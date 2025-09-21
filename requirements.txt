@@ -1,0 +1,26 @@
+# C++ Diffusion XL Dependencies
+# This file lists the required system dependencies for building the project
+
+# CUDA Toolkit 11.8+ with cuDNN 8.6+
+# Download from: https://developer.nvidia.com/cuda-downloads
+# cuDNN from: https://developer.nvidia.com/cudnn
+
+# OpenCV 4.5+
+# Ubuntu/Debian: sudo apt-get install libopencv-dev
+# Windows: Download from https://opencv.org/releases/
+# macOS: brew install opencv
+
+# CMake 3.18+
+# Ubuntu/Debian: sudo apt-get install cmake
+# Windows: Download from https://cmake.org/download/
+# macOS: brew install cmake
+
+# C++17 Compiler
+# Ubuntu/Debian: sudo apt-get install g++-9
+# Windows: Visual Studio 2019+ or MinGW-w64
+# macOS: Xcode Command Line Tools
+
+# Optional: Git for version control
+# Ubuntu/Debian: sudo apt-get install git
+# Windows: Download from https://git-scm.com/download/win
+# macOS: brew install git

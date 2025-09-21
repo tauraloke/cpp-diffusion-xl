@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.18)
+project(cpp_diffusion_xl_cpu)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find required packages
+find_package(OpenCV QUIET)
+
+# Include directories
+include_directories(include)
+
+# Source files
+set(SOURCES
+    src/main.cpp
+    src/sdxl_model.cpp
+    src/sampler_cpu.cpp
+    src/scheduler.cpp
+    src/memory_manager_cpu.cpp
+    src/image_utils_cpu.cpp
+    src/clip_encoder.cpp
+    src/vae_decoder.cpp
+    src/unet_model.cpp
+)
+
+# Create executable
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+# Link libraries
+if(OpenCV_FOUND)
+    target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
+    message(STATUS "OpenCV found, using OpenCV for image processing")
+else()
+    message(STATUS "OpenCV not found, using simple image processing")
+endif()
+
+# Compiler flags
+target_compile_options(${PROJECT_NAME} PRIVATE
+    -O3
+    -Wall
+    -Wextra
+)
+
+# Define CPU-only mode
+target_compile_definitions(${PROJECT_NAME} PRIVATE CPU_ONLY_MODE)
+
+# Windows specific settings
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY WIN32_EXECUTABLE TRUE)
+endif()
