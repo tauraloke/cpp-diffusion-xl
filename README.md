@@ -151,7 +151,3 @@ cpp-diffusion-xl/
 ## Лицензия
 
 MIT License
-
-## Автор
-
-tauraloke
