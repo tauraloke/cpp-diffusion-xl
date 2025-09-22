@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cuda_runtime.h>
+#include <memory>
 
 class Scheduler {
 public:

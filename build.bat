@@ -6,7 +6,7 @@ if not exist build mkdir build
 cd build
 
 REM Configure with CMake
-cmake .. -G "Visual Studio 16 2019" -A x64
+cmake .. -G "Visual Studio 17 2022" -A x64
 if %ERRORLEVEL% neq 0 (
     echo CMake configuration failed!
     pause

@@ -4,6 +4,8 @@
 #include <cudnn.h>
 #include <memory>
 #include <vector>
+#include <mutex>
+#include <chrono>
 
 class MemoryManager::Impl {
 public:
@@ -64,9 +66,16 @@ public:
         }
         
         // Enable cuDNN optimizations
-        if (cudnnSetConvolutionMathType(cudnn_handle, CUDNN_DEFAULT_MATH) != CUDNN_STATUS_SUCCESS) {
+        cudnnConvolutionDescriptor_t conv_desc;
+        cudnnCreateConvolutionDescriptor(&conv_desc);
+        // Use the new API for 2D convolution
+        if (cudnnSetConvolution2dDescriptor(conv_desc, 0, 0, 1, 1, 1, 1, CUDNN_CONVOLUTION, CUDNN_DATA_FLOAT) != CUDNN_STATUS_SUCCESS) {
+            std::cerr << "Warning: Failed to set convolution descriptor" << std::endl;
+        }
+        if (cudnnSetConvolutionMathType(conv_desc, CUDNN_DEFAULT_MATH) != CUDNN_STATUS_SUCCESS) {
             std::cerr << "Warning: Failed to set cuDNN math type" << std::endl;
         }
+        cudnnDestroyConvolutionDescriptor(conv_desc);
         
         return true;
     }
@@ -204,11 +213,11 @@ MemoryManager& MemoryManager::getInstance() {
     return instance;
 }
 
-MemoryManager::MemoryManager() : pImpl(std::make_unique<Impl>()) {}
+//MemoryManager::MemoryManager() : pImpl(std::make_unique<Impl>()) {}
 
-MemoryManager::~MemoryManager() {
-    cleanup();
-}
+//MemoryManager::~MemoryManager() {
+//    cleanup();
+//}
 
 bool MemoryManager::initialize() {
     if (pImpl->initialized) {

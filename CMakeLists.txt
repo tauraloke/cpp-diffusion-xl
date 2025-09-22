@@ -4,32 +4,26 @@ project(cpp_diffusion_xl)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Add C++17 flag for MSVC
+if(MSVC)
+    add_compile_options(/std:c++17)
+endif()
+
+# Set OpenCV paths (update if your installation is different)
+set(OpenCV_DIR "C:/opencv/build")
+
 # Find required packages
-find_package(CUDA REQUIRED)
+find_package(CUDAToolkit REQUIRED)
 find_package(OpenCV QUIET)
-find_package(PkgConfig REQUIRED)
 
 # Set CUDA and cuDNN paths
 set(CUDA_TOOLKIT_ROOT_DIR "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.0")
 set(CUDNN_ROOT "C:/Program Files/NVIDIA/CUDNN/v9.13")
+set(CUDNN_INCLUDE_DIR "${CUDNN_ROOT}/include/13.0")
+set(CUDNN_LIBRARY_DIR "${CUDNN_ROOT}/lib/13.0/x64")
+set(CUDNN_LIBRARY "${CUDNN_LIBRARY_DIR}/cudnn_cnn.lib")
 
-# Find cuDNN
-find_path(CUDNN_INCLUDE_DIR cudnn.h
-    PATHS
-    ${CUDNN_ROOT}/include/13.0
-    ${CUDNN_ROOT}/include
-    ${CUDA_TOOLKIT_ROOT_DIR}/include
-    NO_DEFAULT_PATH
-)
-
-find_library(CUDNN_LIBRARY cudnn
-    PATHS
-    ${CUDNN_ROOT}/lib
-    ${CUDA_TOOLKIT_ROOT_DIR}/lib/x64
-    NO_DEFAULT_PATH
-)
-
-if(CUDNN_INCLUDE_DIR AND CUDNN_LIBRARY)
+if(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn.h" AND EXISTS "${CUDNN_LIBRARY}")
     set(CUDNN_FOUND TRUE)
     message(STATUS "Found cuDNN: ${CUDNN_LIBRARY}")
     message(STATUS "cuDNN include: ${CUDNN_INCLUDE_DIR}")
@@ -37,11 +31,13 @@ else()
     message(FATAL_ERROR "cuDNN not found")
 endif()
 
-# Include directories
-include_directories(${CUDA_INCLUDE_DIRS})
+include_directories(${CUDAToolkit_INCLUDE_DIRS})
 include_directories(${CUDNN_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(include)
+link_directories(${CUDAToolkit_LIBRARY_DIR})
+link_directories(${CUDNN_LIBRARY_DIR})
+link_directories(${OpenCV_DIR}/x64/vc17/lib)
 
 # Source files
 set(SOURCES
@@ -61,13 +57,14 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME}
-    ${CUDA_LIBRARIES}
+    CUDA::cudart
+    CUDA::curand
+    CUDA::cublas
+    CUDA::cusparse
     ${CUDNN_LIBRARY}
-    cudart
-    curand
-    cublas
-    cusparse
+    cudnn.lib
 )
+
 
 # Link OpenCV if found
 if(OpenCV_FOUND)
@@ -80,12 +77,11 @@ endif()
 
 # Compiler flags
 set_property(TARGET ${PROJECT_NAME} PROPERTY CUDA_SEPARABLE_COMPILATION ON)
-target_compile_options(${PROJECT_NAME} PRIVATE
-    -O3
-    -march=native
-    -Wall
-    -Wextra
-)
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /O2 /W4 /std:c++17)
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE -O3 -march=native -Wall -Wextra)
+endif()
 
 # CUDA specific flags
 set_property(TARGET ${PROJECT_NAME} PROPERTY CUDA_ARCHITECTURES 75 80 86 89)
@@ -93,5 +89,4 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CUDA_ARCHITECTURES 75 80 86 89)
 # Windows specific settings
 if(WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
-    set_property(TARGET ${PROJECT_NAME} PROPERTY WIN32_EXECUTABLE TRUE)
 endif()

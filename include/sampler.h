@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 #include <cuda_runtime.h>
+#include <memory>
+#include <random>
 
 class Sampler {
 public:

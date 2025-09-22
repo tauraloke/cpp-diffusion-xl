@@ -7,14 +7,14 @@
 
 class UNetModel {
 public:
-    struct Config {
+struct Config {
         std::string model_path;
         int in_channels = 4;
         int out_channels = 4;
         int model_channels = 320;
-        int attention_resolutions[] = {4, 2, 1};
+        int attention_resolutions[3] = {4, 2, 1};
         int num_res_blocks = 2;
-        int channel_mult[] = {1, 2, 4, 4};
+        int channel_mult[4] = {1, 2, 4, 4};
         int num_heads = 8;
         int num_head_channels = 64;
         int num_heads_upsample = -1;
